@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library - Anggota Management</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <h1>Library Management - Anggota</h1>
+
+    <!-- Form for adding Anggota -->
+    <h2>Tambah Anggota</h2>
+    <form id="anggota-form">
+        <input type="text" id="nama" placeholder="Nama" required>
+        <input type="text" id="alamat" placeholder="Alamat" required>
+        <input type="text" id="no-telepon" placeholder="No Telepon" required>
+        <button type="submit">Tambah Anggota</button>
+    </form>
+
+    <h2>Daftar Anggota</h2>
+    <button onclick="fetchAnggota()">Tampilkan Semua Anggota</button>
+    <div id="anggota-list"></div>
+
+    <script>
+        const apiBaseUrl = 'api.php';
+
+        // Fetch Anggota
+        function fetchAnggota() {
+            $.ajax({
+                url: `${apiBaseUrl}/anggota`,
+                method: 'GET',
+                success: function(data) {
+                    const list = data.map(item => `
+                        <p>
+                            ${item.Nama} - ${item.Alamat} - ${item.No_Telepon} (ID: ${item.ID_Anggota}) 
+                            <button onclick="hapusAnggota(${item.ID_Anggota})">Hapus</button>
+                        </p>`).join('');
+                    $('#anggota-list').html(list);
+                },
+                error: function(err) {
+                    alert('Error fetching anggota: ' + err.responseText);
+                }
+            });
+        }
+
+        // Add Anggota
+        $('#anggota-form').on('submit', function(e) {
+            e.preventDefault();
+            const anggotaData = {
+                Nama: $('#nama').val(),
+                Alamat: $('#alamat').val(),
+                No_Telepon: $('#no-telepon').val()
+            };
+
+            $.ajax({
+                url: `${apiBaseUrl}/anggota`,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(anggotaData),
+                success: function() {
+                    alert('Anggota berhasil ditambahkan');
+                    fetchAnggota();
+                },
+                error: function(err) {
+                    alert('Error menambahkan anggota: ' + err.responseText);
+                }
+            });
+        });
+
+        // Delete Anggota
+        function hapusAnggota(id) {
+            $.ajax({
+                url: `${apiBaseUrl}/anggota`,
+                method: 'DELETE',
+                contentType: 'application/json',
+                data: JSON.stringify({ ID_Anggota: id }),
+                success: function() {
+                    alert('Anggota berhasil dihapus');
+                    fetchAnggota();
+                },
+                error: function(err) {
+                    alert('Error menghapus anggota: ' + err.responseText);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

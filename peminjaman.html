@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library - Peminjaman Management</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <h1>Library Management - Peminjaman</h1>
+
+    <!-- Form for adding Peminjaman -->
+    <h2>Tambah Peminjaman</h2>
+    <form id="peminjaman-form">
+        <input type="number" id="id-anggota" placeholder="ID Anggota" required>
+        <input type="number" id="id-buku" placeholder="ID Buku" required>
+        <input type="date" id="tanggal-pinjam" required>
+        <input type="date" id="tanggal-kembali" required>
+        <button type="submit">Tambah Peminjaman</button>
+    </form>
+
+    <h2>Daftar Peminjaman</h2>
+    <button onclick="fetchPeminjaman()">Tampilkan Semua Peminjaman</button>
+    <div id="peminjaman-list"></div>
+
+    <script>
+        const apiBaseUrl = 'api.php';
+
+        // Fetch Peminjaman
+        function fetchPeminjaman() {
+            $.ajax({
+                url: `${apiBaseUrl}/peminjaman`,
+                method: 'GET',
+                success: function(data) {
+                    const list = data.map(item => `
+                        <p>
+                            ID Anggota: ${item.ID_Anggota}, ID Buku: ${item.ID_Buku}, Status: ${item.Status} 
+                            (ID Peminjaman: ${item.ID_Peminjaman}) 
+                            <button onclick="hapusPeminjaman(${item.ID_Peminjaman})">Hapus</button>
+                        </p>`).join('');
+                    $('#peminjaman-list').html(list);
+                },
+                error: function(err) {
+                    alert('Error fetching peminjaman: ' + err.responseText);
+                }
+            });
+        }
+
+        // Add Peminjaman
+        $('#peminjaman-form').on('submit', function(e) {
+            e.preventDefault();
+            const peminjamanData = {
+                ID_Anggota: parseInt($('#id-anggota').val()),
+                ID_Buku: parseInt($('#id-buku').val()),
+                Tanggal_Pinjam: $('#tanggal-pinjam').val(),
+                Tanggal_Kembali: $('#tanggal-kembali').val()
+            };
+
+            $.ajax({
+                url: `${apiBaseUrl}/peminjaman`,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(peminjamanData),
+                success: function() {
+                    alert('Peminjaman berhasil ditambahkan');
+                    fetchPeminjaman();
+                },
+                error: function(err) {
+                    alert('Error menambahkan peminjaman: ' + err.responseText);
+                }
+            });
+        });
+
+        // Delete Peminjaman
+        function hapusPeminjaman(id) {
+            $.ajax({
+                url: `${apiBaseUrl}/peminjaman`,
+                method: 'DELETE',
+                contentType: 'application/json',
+                data: JSON.stringify({ ID_Peminjaman: id }),
+                success: function() {
+                    alert('Peminjaman berhasil dihapus');
+                    fetchPeminjaman();
+                },
+                error: function(err) {
+                    alert('Error menghapus peminjaman: ' + err.responseText);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

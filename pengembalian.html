@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library - Pengembalian Management</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <h1>Library Management - Pengembalian</h1>
+
+    <!-- Form for adding Pengembalian -->
+    <h2>Tambah Pengembalian</h2>
+    <form id="pengembalian-form">
+        <input type="number" id="id-peminjaman" placeholder="ID Peminjaman" required>
+        <input type="date" id="tanggal-pengembalian" required>
+        <input type="number" id="denda" placeholder="Denda" required>
+        <button type="submit">Tambah Pengembalian</button>
+    </form>
+
+    <h2>Daftar Pengembalian</h2>
+    <button onclick="fetchPengembalian()">Tampilkan Semua Pengembalian</button>
+    <div id="pengembalian-list"></div>
+
+    <script>
+        const apiBaseUrl = 'api.php';
+
+        // Fetch Pengembalian
+        function fetchPengembalian() {
+            $.ajax({
+                url: `${apiBaseUrl}/pengembalian`,
+                method: 'GET',
+                success: function(data) {
+                    const list = data.map(item => `
+                        <p>
+                            ID Peminjaman: ${item.ID_Peminjaman}, Tanggal Pengembalian: ${item.Tanggal_Pengembalian}, 
+                            Denda: ${item.Denda} (ID Pengembalian: ${item.ID_Pengembalian}) 
+                            <button onclick="hapusPengembalian(${item.ID_Pengembalian})">Hapus</button>
+                        </p>`).join('');
+                    $('#pengembalian-list').html(list);
+                },
+                error: function(err) {
+                    alert('Error fetching pengembalian: ' + err.responseText);
+                }
+            });
+        }
+
+        // Add Pengembalian
+        $('#pengembalian-form').on('submit', function(e) {
+            e.preventDefault();
+            const pengembalianData = {
+                ID_Peminjaman: parseInt($('#id-peminjaman').val()),
+                Tanggal_Pengembalian: $('#tanggal-pengembalian').val(),
+                Denda: parseInt($('#denda').val())
+            };
+
+            $.ajax({
+                url: `${apiBaseUrl}/pengembalian`,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(pengembalianData),
+                success: function() {
+                    alert('Pengembalian berhasil ditambahkan');
+                    fetchPengembalian();
+                },
+                error: function(err) {
+                    alert('Error menambahkan pengembalian: ' + err.responseText);
+                }
+            });
+        });
+
+        // Delete Pengembalian
+        function hapusPengembalian(id) {
+            $.ajax({
+                url: `${apiBaseUrl}/pengembalian`,
+                method: 'DELETE',
+                contentType: 'application/json',
+                data: JSON.stringify({ ID_Pengembalian: id }),
+                success: function() {
+                    alert('Pengembalian berhasil dihapus');
+                    fetchPengembalian();
+                },
+                error: function(err) {
+                    alert('Error menghapus pengembalian: ' + err.responseText);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

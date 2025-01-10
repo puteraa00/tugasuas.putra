@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library - Buku Management</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <h1>Library Management - Buku</h1>
+
+    <!-- Form for adding Buku -->
+    <h2>Tambah Buku</h2>
+    <form id="buku-form">
+        <input type="text" id="judul" placeholder="Judul" required>
+        <input type="text" id="penulis" placeholder="Penulis" required>
+        <input type="text" id="penerbit" placeholder="Penerbit" required>
+        <input type="number" id="tahun-terbit" placeholder="Tahun Terbit" required>
+        <input type="number" id="id-kategori" placeholder="ID Kategori" required>
+        <button type="submit">Tambah Buku</button>
+    </form>
+
+    <h2>Daftar Buku</h2>
+    <button onclick="fetchBuku()">Tampilkan Semua Buku</button>
+    <div id="buku-list"></div>
+
+    <script>
+        const apiBaseUrl = 'api.php';
+
+        // Fetch Buku
+        function fetchBuku() {
+            $.ajax({
+                url: `${apiBaseUrl}/buku`,
+                method: 'GET',
+                success: function(data) {
+                    const list = data.map(item => `
+                        <p>
+                            ${item.Judul} - ${item.Penulis} (ID: ${item.ID_Buku}) 
+                            <button onclick="hapusBuku(${item.ID_Buku})">Hapus</button>
+                        </p>`).join('');
+                    $('#buku-list').html(list);
+                },
+                error: function(err) {
+                    alert('Error fetching buku: ' + err.responseText);
+                }
+            });
+        }
+
+        // Add Buku
+        $('#buku-form').on('submit', function(e) {
+            e.preventDefault();
+            const bukuData = {
+                Judul: $('#judul').val(),
+                Penulis: $('#penulis').val(),
+                Penerbit: $('#penerbit').val(),
+                Tahun_Terbit: parseInt($('#tahun-terbit').val()),
+                ID_Kategori: parseInt($('#id-kategori').val())
+            };
+
+            $.ajax({
+                url: `${apiBaseUrl}/buku`,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(bukuData),
+                success: function() {
+                    alert('Buku berhasil ditambahkan');
+                    fetchBuku();
+                },
+                error: function(err) {
+                    alert('Error menambahkan buku: ' + err.responseText);
+                }
+            });
+        });
+
+        // Delete Buku
+        function hapusBuku(id) {
+            $.ajax({
+                url: `${apiBaseUrl}/buku`,
+                method: 'DELETE',
+                contentType: 'application/json',
+                data: JSON.stringify({ ID_Buku: id }),
+                success: function() {
+                    alert('Buku berhasil dihapus');
+                    fetchBuku();
+                },
+                error: function(err) {
+                    alert('Error menghapus buku: ' + err.responseText);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

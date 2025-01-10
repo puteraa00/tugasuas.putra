@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <h1>Library Management System</h1>
+
+    <!-- Form for Kategori -->
+    <h2>Kategori</h2>
+    <form id="kategori-form">
+        <input type="text" id="nama-kategori" placeholder="Nama Kategori" required>
+        <button type="submit">Tambah Kategori</button>
+    </form>
+    <button onclick="fetchKategori()">Tampilkan Semua Kategori</button>
+    <div id="kategori-list"></div>
+
+    <script>
+        const apiBaseUrl = 'api.php';
+
+        // Fetch Kategori
+        function fetchKategori() {
+            $.ajax({
+                url: `${apiBaseUrl}/kategori`,
+                method: 'GET',
+                success: function(data) {
+                    const list = data.map(item => `<p>${item.Nama_Kategori} (ID: ${item.ID_Kategori}) <button onclick="hapusKategori(${item.ID_Kategori})">Hapus</button></p>`).join('');
+                    $('#kategori-list').html(list);
+                },
+                error: function(err) {
+                    alert('Error fetching kategori: ' + err.responseText);
+                }
+            });
+        }
+
+        // Add Kategori
+        $('#kategori-form').on('submit', function(e) {
+            e.preventDefault();
+            const namaKategori = $('#nama-kategori').val();
+            $.ajax({
+                url: `${apiBaseUrl}/kategori`,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ Nama_Kategori: namaKategori }),
+                success: function() {
+                    alert('Kategori berhasil ditambahkan');
+                    fetchKategori();
+                },
+                error: function(err) {
+                    alert('Error menambahkan kategori: ' + err.responseText);
+                }
+            });
+        });
+
+        // Delete Kategori
+        function hapusKategori(id) {
+            $.ajax({
+                url: `${apiBaseUrl}/kategori`,
+                method: 'DELETE',
+                contentType: 'application/json',
+                data: JSON.stringify({ ID_Kategori: id }),
+                success: function() {
+                    alert('Kategori berhasil dihapus');
+                    fetchKategori();
+                },
+                error: function(err) {
+                    alert('Error menghapus kategori: ' + err.responseText);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
